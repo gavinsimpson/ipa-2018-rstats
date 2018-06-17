@@ -1,0 +1,179 @@
+---
+title: "R Workshop"
+subtitle: "Plotting, data import, and data processing"
+author: "Gavin Simpson"
+date: "2018-06-15"
+output:
+  xaringan::moon_reader:
+    css: ['default', './resources/my.css']
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment=NA,
+                      echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE,
+                      fig.align = 'center', fig.height = 4.5, fig.width = 8, dev = 'svg')
+knitr::knit_hooks$set(crop.plot = knitr::hook_pdfcrop)
+options(htmltools.dir.version = FALSE)
+```
+```{r packages, include = FALSE, cache = FALSE, echo = FALSE}
+library('ggplot2')
+library('cowplot')
+library('tidyr')
+library('knitr')
+library('viridis')
+library('dplyr')
+library('readr')
+library('readxl')
+```
+```{r ggplot-set-up, cache=FALSE, echo = FALSE}
+theme_set(theme_bw())
+```
+
+# Preamble
+
+Install some packages
+
+```{r package-install, eval = FALSE}
+pkgs <- c('ggplot2', 'cowplot', 'tidyr', 'viridis', 'dplyr', 'readr',
+          'readxl', 'gapminder')
+install.packages(pkgs)
+```
+
+Code / slides are available:
+
+[https://github.com/gavinsimpson/ipa-2018-rstats]()
+
+---
+
+# Warm-up
+
+```{r intro-figure, echo = FALSE}
+## install.pckages('gapminder')
+data(gapminder, package = 'gapminder')
+
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(shape = 1, aes(color = continent)) +
+  stat_smooth(method = "lm", size = 1, color = "black") +
+  scale_x_log10() +
+  xlab("Per Capita GDP") +
+  ylab("Life Expectancy (yrs)") +
+  facet_wrap(~continent, scales = "free") +
+  theme_bw() +
+  guides(color=FALSE)
+```
+---
+
+# Intro
+
+```{r intro-figure-code, eval = FALSE, ref.label = 'intro-figure', dependson = -1}
+```
+
+---
+
+# Plotting in R
+
+Three main ways to plot in R
+
+1. *base graphics* &mdash; what most of R's out-of-the-box `plot` code uses,
+2. *lattice* &mdash; an R implementation of Trellis graphics in S-PLUS
+3. *ggplot2* &mdash; an R implementation of the Grammar of Graphics
+---
+
+# Why choose *ggplot2*?
+
+* Compact & more expressive code than base graphics
+* Plots look nicer (to me at least) than either base graphics or lattice
+* Automates production of legends and keys
+* Powerful for exploratory data anaylsis & quickly interating on plots
+* Widely-used, popular &mdash; lots of help/guides available on-line
+
+---
+
+# The grammar
+
+* data
+* aesthetics
+* **geom**etry
+* stats
+* facets
+* scales
+* coordinates
+
+---
+
+# Data
+
+* The data object (or objects) for a plot must be in the form of a *tidy* data frame
+* Can use one data frame for all elements of a plot
+* But individual layers can have their own data
+
+---
+
+# Edgar Anderson's `iris` dataset
+
+```{r head-iris}
+head(iris)
+```
+
+* These data are stored in a wide format
+
+* Information is stored in the column labels
+
+* One column per variable
+
+---
+
+# Tidy data
+
+* Tidy data is a concept of Hadley Wickham's, author of *ggplot2*
+
+* Similar to long format or normalised data
+
+* If you want to assign a variable to an element on the plot it needs to be a variable in the tidy data frame
+
+---
+
+# `tidyr`
+
+```{r}
+iris[1:2, ]
+
+library('tidyr')
+df <- gather(iris, key = "attribute", value = "measurement",
+             - Species)
+
+df[1:2, ]
+```
+
+---
+
+# Climate data &mdash; reading in data
+
+In-built reading of tabular data from files
+
+```{r}
+climate <- read.csv('http://bit.ly/2JLBIFv')
+climate <- climate[, -1]
+climate[1:2, ]
+climate[1:2, ]
+```
+
+---
+
+# Reading in data via *tidyverse*
+
+Consistent versions from the *tidyverse*
+
+```{r}
+library('readr')
+climate <- read_csv('http://bit.ly/2JLBIFv')
+climate <- climate[, -1]
+climate[1:2, ]
+```
+
